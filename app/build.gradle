@@ -1,0 +1,117 @@
+apply plugin: 'com.android.library'
+apply plugin: 'com.github.dcendents.android-maven'
+apply plugin: 'com.jfrog.bintray'
+
+// This is the library version used when deploying the artifact
+version = "1.1.3"
+
+
+android {
+    compileSdkVersion 21
+    buildToolsVersion "21.1.2"
+//    resourcePrefix "pluslibrary__"
+
+
+    defaultConfig {
+        minSdkVersion 15
+        targetSdkVersion 21
+        versionCode 1
+        versionName version
+    }
+    buildTypes {
+//        release {
+//            minifyEnabled false
+//            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+//        }
+    }
+}
+
+
+def siteUrl = 'https://github.com/goodsogi/PlusLibrary.git'      // Homepage URL of the library
+def gitUrl = 'https://github.com/goodsogi/PlusLibrary.git'   // Git repository URL
+group = "com.pluslibrary"  //package name                                      // Maven Group ID for the artifact
+
+
+dependencies {
+    compile fileTree(dir: 'libs', include: ['*.jar'])
+    compile 'com.android.support:appcompat-v7:21.0.3'
+    compile 'com.google.android.gms:play-services:+'
+    compile 'com.loopj.android:android-async-http:1.4.5'
+    compile files('libs/universal-image-loader-1.9.2.jar')
+}
+
+install {
+    repositories.mavenInstaller {
+        // This generates POM.xml with proper parameters
+        pom {
+            project {
+                packaging 'aar'
+
+                // Add your description here
+                name 'Library that helps you develop android project in ease'
+                url siteUrl
+
+                // Set your license
+                licenses {
+                    license {
+                        name 'The Apache Software License, Version 2.0'
+                        url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                    }
+                }
+                developers {
+                    developer {
+                        id 'goodsogi'
+                        name 'Jeonggyu Park'
+                        email 'goodsogi@gmail.com'
+                    }
+                }
+                scm {
+                    connection gitUrl
+                    developerConnection gitUrl
+                    url siteUrl
+
+                }
+            }
+        }
+    }
+}
+
+dependencies {
+}
+
+task sourcesJar(type: Jar) {
+    from android.sourceSets.main.java.srcDirs
+    classifier = 'sources'
+}
+
+task javadoc(type: Javadoc) {
+    source = android.sourceSets.main.java.srcDirs
+    classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
+}
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    classifier = 'javadoc'
+    from javadoc.destinationDir
+}
+artifacts {
+    archives javadocJar
+    archives sourcesJar
+}
+
+Properties properties = new Properties()
+properties.load(project.rootProject.file('local.properties').newDataInputStream())
+
+bintray {
+    user = properties.getProperty("bintray.user")
+    key = properties.getProperty("bintray.apikey")
+
+    configurations = ['archives']
+    pkg {
+        repo = "maven"
+        name = "pluslibrary"
+        websiteUrl = siteUrl
+        vcsUrl = gitUrl
+        licenses = ["Apache-2.0"]
+        publish = true
+    }
+}
